@@ -2,61 +2,61 @@ const express = require('express');
 const { response } = require('../app');
 const router = express.Router();
 const mysql = require("../mysql").pool;
-const usuario =
+const empresa =
 [
   {
       "id":1,
-      "nomeusuario":"Carlos", 
-      "email":"sousamacedo18@gmail.com",
-      "senha":"123"
+      "nome":"Carlos", 
+      "responsavel":"sousamacedo18@gmail.com",
+      "contato":"123"
   },
   {
       "id":2,
       "nome":"Pedro",
-      "email":"pedro@gmail.com",
-      "senha":"123"
+      "responsavel":"pedro@gmail.com",
+      "contato":"123"
   },
   {
       "id":3,
       "nome":"João Neto",
-      "email":"joaoneto@gmail.com",
-      "senha":"123"  
+      "responsavel":"joaoneto@gmail.com",
+      "contato":"123"  
   }, 
   {
       "id":4,
       "nome":"Iarly",
-      "email":"iarly@gmail.com",
-      "senha":"123"  
+      "responsavel":"iarly@gmail.com",
+      "contato":"123"  
   }, 
   {
       "id":5,
       "nome":"Guimas",
-      "email":"guimaraes@gmail.com",
-      "senha":"123"  
+      "responsavel":"guimaraes@gmail.com",
+      "contato":"123"  
   }, 
   {
       "id":6,
       "nome":"Filipe",
-      "email":"filipe@gmail.com",
-      "senha":"123"  
+      "responsavel":"filipe@gmail.com",
+      "contato":"123"  
   }, 
   {
       "id":7,
       "nome":"Ray",
-      "email":"ray@gmail.com",
-      "senha":"123"  
+      "responsavel":"ray@gmail.com",
+      "contato":"123"  
   }, 
   {
       "id":8,
       "nome":"Max",
-      "email":"max@gmail.com",
-      "senha":"123"  
+      "responsavel":"max@gmail.com",
+      "contato":"123"  
   }, 
   {
       "id":9,
       "nome":"Gabriela",
-      "email":"gabriela@gmail.com",
-      "senha":"123"  
+      "responsavel":"gabriela@gmail.com",
+      "contato":"123"  
   } 
 ]
 
@@ -65,10 +65,17 @@ function validacaoEmail(email){
   return re.test(email);
 }
 //para consultar todos os dados
+// router.get('/',(req,res,next)=>{
+//     res.status(200).send({
+//         mensagem:"AQUI É A LISTA DE EMPRESA!",
+//         empresa:empresa
+//         // usuario:usuario[2].nome
+//       })
+// })
 router.get('/',(req,res,next)=>{
     mysql.getConnection((error,conn)=>{
         conn.query(
-            "SELECT * FROM `usuario` ",
+            "SELECT * FROM `empresa` ",
             (error,resultado,field)=>{
                 conn.release();
                 if(error){
@@ -78,8 +85,8 @@ router.get('/',(req,res,next)=>{
                     })
                 }
                 res.status(200).send({
-                    mensagem:"AQUI É A LISTA DE USUÁRIOS!",
-                    usuario:resultado
+                    mensagem:"AQUI É A LISTA DE EMPRESA!",
+                    empresa:resultado
                     // usuario:usuario[2].nome
                   })
             }     
@@ -90,9 +97,14 @@ router.get('/',(req,res,next)=>{
 //para consultar um determinado cadastro
 router.get('/:id',(req,res,next)=>{
     const id = req.params.id;
+    // let listaempresa=empresa.filter(value=>value.id==id);
+    // res.status(200).send({
+    //     mensagem:`aqui é a lista de um usuário com id:${id}`,
+    //     empresa:listaempresa
+    //   })
     mysql.getConnection((error,conn)=>{
         conn.query(
-            "SELECT * FROM `usuario` WHERE id=?",[id],
+            `SELECT * FROM empresa where id = ${id}` ,
             (error,resultado,field)=>{
                 conn.release();
                 if(error){
@@ -102,8 +114,8 @@ router.get('/:id',(req,res,next)=>{
                     })
                 }
                 res.status(200).send({
-                    mensagem:"AQUI É A LISTA DE USUÁRIOS!",
-                    usuario:resultado
+                    mensagem:"AQUI É A LISTA DE EMPRESA!",
+                    empresa:resultado
                     // usuario:usuario[2].nome
                   })
             }     
@@ -115,33 +127,33 @@ router.post('/', (req, res, next) => {
   let msg=[];
   let i=0;
 
-  const usuario = {
+  const empresa = {
       nome: req.body.nome,
-      email: req.body.email,
-      senha: req.body.senha
+      responsavel: req.body.responsavel,
+      contato: req.body.contato
   }
-
-  if(usuario.nome.length<3){
+  if(empresa.nome.length<3){
       msg.push({mensagem:"campo com menos de 3 caracteres!"})
       i++;
   }
 
-  if(validacaoEmail(usuario.email)==false){
-          msg.push({mensagem:"Email inválido!"})
-          i++;
-  }
-  if(usuario.senha.length==0){
-          msg.push({mensagem:"Senha inválida!"})
+  if(empresa.responsavel.length==0){
+
+    msg.push({mensagem:"Responsavel inválido!"})
+    i++;
+}
+  if(empresa.contato.length==0){
+          msg.push({mensagem:"Contato inválida!"})
           i++;
   }
   if(i==0){
     mysql.getConnection((error,conn)=>{
         conn.query(
-            "INSERT INTO `usuario` (nome,email,senha) values(?,?,?)",
-            [usuario.nome,usuario.email,usuario.senha],
+            "INSERT INTO `empresa` (nome,responsavel,contato) values(?,?,?)",
+            [empresa.nome,empresa.responsavel,empresa.contato],
             (error,resultado,field)=>{
                 conn.release();
-                console.log(usuario)
+                console.log(empresa)
                 if(error){
                     res.status(500).send({
                         error:error,
@@ -150,48 +162,50 @@ router.post('/', (req, res, next) => {
                 }
                 res.status(201).send({
                     mensagem:"CADASTRO CRIADO COM SUCESSO!",
-                    usuario:resultado.insertId
+                    empresa:resultado.insertId
                     // usuario:usuario[2].nome
                   })
             })
-        })  
-    }
+        })
+  } else {
+          res.status(500).send({
+          mensagem:msg
+      })
   }
+
+}
 )
 
 router.patch('/', (req, res, next) => {
   let msg=[];
   let i=0;
-  const { id, nome, email, senha } = req.body;
+  const { id, nome, responsavel, contato } = req.body;
 
-//   let lista=usuario.map(item=>{
+//   let lista=empresa.map(item=>{
 //       // if(item==id){
 //       return(
 //           item.nome=nome,
-//           item.email=email,
-//           item.senha=senha
+//           item.responsavel=responsavel,
+//           item.contato=contato
 //           )
 //   });
   if(nome.length<3){
       msg.push({mensagem:"campo com menos de 3 caracteres!"})
       i++;
   }
-
-  if(validacaoEmail(email)==false){
-
-          msg.push({mensagem:"Email inválido!"})
+  if(responsavel.length==0){
+          msg.push({mensagem:"Responsavel inválido!"})
           i++;
   }
-  if(senha.length==0){
-
-          msg.push({mensagem:"senha inválida!"})
+  if(contato.length==0){
+          msg.push({mensagem:"Contato inválida!"})
           i++;
   }
   if(i==0){
     mysql.getConnection((error,conn)=>{
         conn.query(
-            "update `usuario` set nome=?,email=?,senha=? where id=?",
-            [nome,email,senha,id],
+            "update `empresa` set nome=?,responsavel=?,contato=? where id=?",
+            [nome,responsavel,contato,id],
             (error,resultado,field)=>{
                 conn.release();
                 if(error){
@@ -201,9 +215,9 @@ router.patch('/', (req, res, next) => {
                     })
                 }
                 res.status(201).send({
-                    mensagem:"CADASTRO DE USUARIO ALTERADO COM SUCESSO!",
-                    // usuario:resultado.insertId
-                    // usuario:usuario[2].nome
+                    mensagem:"CADASTRO ALTERADO COM SUCESSO!",
+                    empresa:resultado.insertId
+                    // empresa:empresa[2].nome
                   })
             })
         })
@@ -212,36 +226,39 @@ router.patch('/', (req, res, next) => {
           mensagem:msg
       })
   }
+
 })
 
-router.delete("/:id",(req,res,next)=>{
-  const{id}=req.params;
-//       let dadosdeletados=usuario.filter(value=>value.id==id);
-//       let listausuario=usuario.filter(value=>value.id!=id);
+// router.delete("/:id",(req,res,next)=>{
+//   const{id}=req.params;
+//       let dadosdeletados=empresa.filter(value=>value.id==id);
+//       let listaempresa=empresa.filter(value=>value.id!=id);
 //     res.status(201).send({
 //       mensagem:"Dados deletados com sucesso",
-//       dadosnovos:listausuario,
+//       dadosnovos:listaempresa,
 //       deletados:dadosdeletados
 //   })
-mysql.getConnection((error,conn)=>{
-    conn.query(
-        `DELETE FROM usuario WHERE id=${id}`,
-        (error,resultado,field)=>{
-            conn.release();
-            if(error){
-                res.status(500).send({
-                    error:error,
-                    response:null
+router.delete("/:id",(req,res,next)=>{
+const{id}=req.params;
+  mysql.getConnection((error,conn)=>{
+      conn.query(
+          `DELETE FROM empresa WHERE id=${id}`,
+          (error,resultado,field)=>{
+              conn.release();
+              if(error){
+                  res.status(500).send({
+                      error:error,
+                      response:null
+                  })
+              }
+              res.status(200).send({
+                  mensagem:"AQUI É A LISTA DE EMPRESA!",
+                  empresa:resultado
+                  // usuario:usuario[2].nome
                 })
-            }
-            res.status(200).send({
-                mensagem:"AQUI É A LISTA DE USUÁRIOS!",
-                usuario:resultado
-                // usuario:usuario[2].nome
-              })
-        }     
-        )
-})
+          }     
+          )
+  })
 
 });
 
